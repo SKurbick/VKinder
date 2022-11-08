@@ -21,13 +21,16 @@ start_keyboard = {
 second_keyboard = {
     "one_time": True,
     "buttons": [
-        [get_button("изменить поисковые данные", "primary")],
-        [get_button("следующий профиль", "positive")]
+        [get_button("следующий профиль", "positive")],
+        [get_button("добавить в избранное", "positive"), get_button("список избранных", "positive")],
+        [get_button("изменить поисковые данные", "primary"), get_button("help", "secondary")],
     ]
 }
 start_keyboard = json.dumps(start_keyboard, ensure_ascii=False).encode("utf-8")
 start_keyboard = str(start_keyboard.decode("utf-8"))
-start_message = "Введите данные в формате 'город пол возраст от\до'\nПример ввода: Москва 1 18 25\n Для разделения используйте только пробел, в конце его использовать не нужно"
+help_message = """Введите данные в формате 'Поиск: город пол возраст от\до'
+                    Пример ввода: 'Поиск: Москва 1 18 25'
+                    Для разделения используйте только пробел, в конце его использовать не нужно"""
 
 second_keyboard = json.dumps(second_keyboard, ensure_ascii=False).encode("utf-8")
 second_keyboard = str(second_keyboard.decode("utf-8"))

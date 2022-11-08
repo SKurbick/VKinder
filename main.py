@@ -1,7 +1,7 @@
 import random
 
 import requests
-from token import token_vk_app
+from token_file import token_vk_app
 from pprint import pprint
 
 
