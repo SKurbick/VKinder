@@ -1,8 +1,5 @@
-import random
-
 import requests
 from token_file import token_vk_app
-from pprint import pprint
 
 
 class VK:
@@ -33,7 +30,6 @@ class VK:
             # 'fields': 'is_closed'
         }
         response = requests.get(url, params={**self.params, **params})
-        count = 0
         users_info = []
         for i in response.json()['response']['items']:
             if i['can_access_closed'] is True:
@@ -43,7 +39,6 @@ class VK:
                     'link': f"https://vk.com/id{i['id']}",
                     'user_id': i["id"]
                 }
-                count += 1
                 users_info.append(user_info)
 
         return users_info
@@ -62,7 +57,6 @@ class VK:
 
         response = requests.get(url, params=params)
         photos_info = []
-        # return response.json()
         for i in response.json()['response']['items']:
             photo_info = {
                 'id': i['id'],
@@ -73,18 +67,3 @@ class VK:
             photos_info.append(photo_info)
         sorted_func = sorted(photos_info, key=lambda b: b['likes'])
         return sorted_func[-3:]
-
-
-
-# vk = VK(users_id=1, city=search_city, sex=search_sex, age_from=search_age_from, age_to=search_age_to)
-# pprint(vk.users_search())
-# pprint(vk.get_photos())
-# a = iter(vk.users_search())
-# print(next(a))
-# print(next(a))
-# type(next(a))
-
-# a = iter(vk.users_search())
-# data =next(a)
-# print(data['first_name'],data['last_name'], data['link'])
-# print(next(a))
