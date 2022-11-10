@@ -28,8 +28,8 @@ second_keyboard = {
 }
 start_keyboard = json.dumps(start_keyboard, ensure_ascii=False).encode("utf-8")
 start_keyboard = str(start_keyboard.decode("utf-8"))
-help_message = """Введите данные в формате 'Поиск: город пол возраст от\до'
-                    Пример ввода: 'Поиск: Москва 1 18 25'
+how_search_message = """Введите данные в формате 'поиск город пол возраст от\до'
+                    Пример ввода: 'Поиск Москва женский 18 25'
                     Для разделения используйте только пробел, в конце его использовать не нужно"""
 
 second_keyboard = json.dumps(second_keyboard, ensure_ascii=False).encode("utf-8")

@@ -1,78 +1,60 @@
-from token_file import token_vk_group_bot
-from config import start_keyboard, help_message, second_keyboard
-import vk_api
-from vk_api.longpoll import VkLongPoll, VkEventType
-from vk_api_func import VK
-
-vk_session = vk_api.VkApi(token=token_vk_group_bot)
-session_api = vk_session.get_api()
-long_poll = VkLongPoll(vk_session)
+from vk_api_func import ApiFunction
 
 
-def sender(vk_id, keyboard=start_keyboard, text=None, photos=None, ):
-    vk_session.method('messages.send', {'user_id': vk_id, 'message': text,
-                                        "attachment": photos,
-                                        "random_id": 0, "keyboard": keyboard})
+class BotFunction:
+    def __init__(self, vk_user_id, city, sex, age_from, age_to):
+        self.data = None
+        self.datas = None
+        self.city = city
+        self.sex = sex
+        self.age_from = age_from
+        self.age_to = age_to
+        self.favorite_list = []
+        self.black_list = []
+        self.vk_user_id = vk_user_id
 
+    def user_search_data(self):
+        sex_key = {"мужской": 2, "женский": 1, "любой": 0}
+        vk_search_user = ApiFunction(city=self.city, sex=sex_key[self.sex], age_from=self.age_from,
+                                     age_to=self.age_to)
+        self.datas = iter(vk_search_user.users_search())
+        self.data = next(self.datas)
+        vk_upload_photo = ApiFunction(users_id=f"{self.data['user_id']}")
+        users_photo = vk_upload_photo.get_photos()
+        photos = ''
+        for photo in users_photo:
+            photos += photo["attachment"] + ','
+        user_name_and_link = f"{self.data['profile_name']}\n {self.data['link']}"
+        return user_name_and_link, photos
 
-favorite_list = []
-black_list = []
-datas = None
-data = None
-for event in long_poll.listen():
-    if event.type == VkEventType.MESSAGE_NEW:
-        if event.to_me:
-            message_from_user = event.text.lower()
-            vk_user_id = event.user_id
-            if message_from_user == "start" or message_from_user == "изменить поисковые данные"\
-                    or message_from_user == "ввести данные для поиска":
-                sender(vk_user_id, text=help_message)
+    def next_profile(self):
+        self.data = next(self.datas)
 
-            if message_from_user[:6] == "поиск:":
-                print(message_from_user)
-                search, city, sex, age_from, age_to = message_from_user.split()
-                sex_key = {"мужской": 2, "женский": 1, "любой": 0}
-                vk_search_user = VK(city=city, sex=sex_key[sex], age_from=age_from, age_to=age_to)
-                datas = iter(vk_search_user.users_search())
-                data = next(datas)
-                print(data)
-                sender(vk_user_id, text=f"{data['profile_name']}\n {data['link']}")
+        vk_upload_photo = ApiFunction(users_id=f"{self.data['user_id']}")
+        users_photo = vk_upload_photo.get_photos()
+        photos = ''
+        for photo in users_photo:
+            photos += photo["attachment"] + ','
+        user_name_and_link = f"{self.data['profile_name']}\n {self.data['link']}"
+        return user_name_and_link, photos
 
-                vk_upload_photo = VK(users_id=f"{data['user_id']}")
-                users_photo = vk_upload_photo.get_photos()
-                for photo in users_photo:
-                    sender(vk_user_id, text=None, photos=photo['attachment'], keyboard=second_keyboard)
+    def add_to_favorites_lists(self):
+        if self.data not in self.favorite_list:
+            self.favorite_list.append(self.data)
+            text = f"Профиль '{self.data['profile_name']}' добавлен в избранное"
+        else:
+            text = f"Профиль '{self.data['profile_name']}' уже был в избранном",
+        return text
 
-            if message_from_user == "следующий профиль":
-                data = next(datas)
-                print(data)
-                print(message_from_user)
-                sender(vk_user_id, text=f"{data['profile_name']}\n {data['link']}")
+    def show_favorites_list(self):
+        count = 0
+        text = ""
+        for user in self.favorite_list:
+            count += 1
+            text += f"{count}: {user['profile_name']} ссылка: {user['link']}\n"
+        return text
 
-                vk_upload_photo = VK(users_id=f"{data['user_id']}")
-                users_photo = vk_upload_photo.get_photos()
-                for photo in users_photo:
-                    sender(vk_user_id, text=None, photos=photo['attachment'], keyboard=second_keyboard)
-
-            if message_from_user == "добавить в избранное":
-                if data not in favorite_list:
-                    favorite_list.append(data)
-                    sender(vk_user_id,
-                           text=f"Профиль '{data['profile_name']}' добавлен в избранное",
-                           keyboard=second_keyboard)
-                    print(favorite_list)
-                else:
-                    sender(vk_user_id,
-                           text=f"Профиль '{data['profile_name']}' уже был в избранном",
-                           keyboard=second_keyboard)
-                    print(favorite_list)
-            if message_from_user == "добавить в черный список":
-                black_list.append(data)
-                sender(vk_user_id, text=f"Профиль {data['profile_name']} больше не отобразится",
-                       keyboard=second_keyboard)
-
-            if message_from_user == "список избранных":
-                count = 0
-                for user in favorite_list:
-                    count += 1
-                    sender(vk_user_id, text=f"{count}: {user['profile_name']} ссылка: {user['link']}")
+    def add_to_black_list(self):
+        self.black_list.append(self.data)
+        text = f"Профиль {self.data['profile_name']} больше не отобразится"
+        return text

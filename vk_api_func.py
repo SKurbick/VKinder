@@ -2,7 +2,7 @@ import requests
 from token_file import token_vk_app
 
 
-class VK:
+class ApiFunction:
 
     def __init__(self, users_id=None, access_token=token_vk_app, city=None, sex=None, age_from=None, age_to=None,
                  version='5.131',
